@@ -1,7 +1,8 @@
 import streamlit as st
 import base64
-import joblib
+import pickle
 import pandas as pd
+from PIL import Image
 
 # Function to set background image
 def set_background(image_file):
@@ -23,51 +24,37 @@ def set_background(image_file):
 # Set the background image
 set_background("1.png")
 
-
-
-
-
 # Custom CSS for header background color only
 st.markdown(
     """
     <style>
-    /* Target the header container */
     .st-emotion-cache-12fmjuu {
-        background-color: #ff9d3c; /* Set background color to orange */
+        background-color: #ff9d3c;
     }
     
-    /* Ensure buttons and other elements within the header are not affected */
     .st-emotion-cache-1huvf7z,
     .st-emotion-cache-w3nhqi {
-        background-color: transparent; /* Ensure buttons keep their original background */
-        color: inherit; /* Ensure text color inherits from its parent */
-        border: none; /* Remove any border if present */
+        background-color: transparent;
+        color: inherit;
+        border: none;
     }
     
     .st-emotion-cache-1wbqy5l span {
-        color: inherit; /* Ensure button text color inherits from its parent */
+        color: inherit;
     }
 
     .st-emotion-cache-1pbsqtx {
-        fill: inherit; /* Ensure icon color inherits from its parent */
+        fill: inherit;
     }
     </style>
     """,
     unsafe_allow_html=True
 )
 
-
-# Page content
-
 # Adjust the heading with updated CSS
 st.markdown("""
     <h1 style='text-align: center; color: #30373e; font-size: 55px; margin-top: -100px; margin-bottom: 0;'>Amazon Buy Box Prediction</h1>
     """, unsafe_allow_html=True)
-
-
-
-import streamlit as st
-from PIL import Image
 
 # Load your images
 img1 = Image.open("emsbay.jpg")
@@ -76,136 +63,123 @@ img2 = Image.open("whole-basket.png")
 # Display the first image at the top of the sidebar
 st.sidebar.image(img1, use_column_width=True)
 
-
-import streamlit as st
-import pickle
-import pandas as pd
-
 # Load the trained model
 @st.cache_resource
 def load_model():
-    with open('model.pkl', 'rb') as file:
+    with open('modell.pkl', 'rb') as file:
         return pickle.load(file)
 
 model = load_model()
 
 # Custom CSS for sidebar styling
-
-
 st.markdown(
     """
     <style>
-    /* Target the sidebar container */
-    .st-emotion-cache-1gv3huu {
+    /* Sidebar container styling */
+    .stSidebar {
         background-color: #2f3841;
         color: white;
     }
     
-    /* Target text and other elements inside the sidebar */
-    .st-emotion-cache-1gv3huu .st-emotion-cache-6qob1r,
-    .st-emotion-cache-1gv3huu .st-emotion-cache-1mi2ry5,
-    .st-emotion-cache-1gv3huu .st-emotion-cache-1gwvy71,
-    .st-emotion-cache-1gv3huu .st-emotion-cache-1v7f65g,
-    .st-emotion-cache-1gv3huu .st-emotion-cache-uzeiqp,
-    .st-emotion-cache-1gv3huu .st-emotion-cache-9ycgxx {
+    /* Styling for sidebar text and labels */
+    .stSidebar .st-cqfsce,
+    .stSidebar .st-emotion-cache-1gwvy71,
+    .stSidebar .st-emotion-cache-6qob1r,
+    .stSidebar .st-emotion-cache-1mi2ry5 {
         color: white;
     }
 
-    /* Style file uploader and button */
-    .st-emotion-cache-1gv3huu .st-emotion-cache-taue2i,
-    .st-emotion-cache-1gv3huu .st-emotion-cache-1ny7cjd {
+    /* Styling for sidebar input fields */
+    .stSidebar input,
+    .stSidebar select,
+    .stSidebar .st-emotion-cache-1ny7cjd {
         color: white;
         background-color: #2f3841;
-        border-color: white;
-    }
-    
-    .st-emotion-cache-1gv3huu .st-emotion-cache-taue2i {
-        border: 2px dashed white;
+        border: 1px solid white;
     }
 
-    .st-emotion-cache-1gv3huu .st-emotion-cache-1ny7cjd:hover {
+    .stSidebar .st-emotion-cache-1ny7cjd:hover {
         background-color: grey;
         border-color: grey;
+    }
+
+    /* Ensure sidebar labels are visible and white */
+    .stSidebar label {
+        color: white !important;
+    }
+
+    .stSidebar .st-emotion-cache-1mi2ry5 {
+        font-size: 16px;
     }
     </style>
     """,
     unsafe_allow_html=True
 )
 
-
-
-# Upload CSV file for prediction
 # Custom CSS to style the sidebar header
 st.markdown(
     """
     <style>
-    /* Target the specific h2 element for the sidebar header */
+    /* Target the sidebar header */
     .st-emotion-cache-uzeiqp h2 {
-        color: white; /* Change text color to gray */
+        color: white;
+        font-size: 20px;
     }
     </style>
     """,
     unsafe_allow_html=True
 )
 
-st.sidebar.header("Upload CSV File")
-uploaded_file = st.sidebar.file_uploader("Choose a CSV file", type="csv")
+st.sidebar.header("Enter Feature Values")
+
+# Create input fields for each feature with proper labels
+price = st.sidebar.number_input("Price", min_value=0.0, value=19.99, step=0.01)
+quantity = st.sidebar.number_input("Quantity", min_value=1, value=1)
+sales_rank_current = st.sidebar.number_input("Sales Rank: Current", min_value=0, value=500)
+reviews_rating = st.sidebar.slider("Reviews: Rating", min_value=0.0, max_value=5.0, value=4.5, step=0.1)
+reviews_review_count = st.sidebar.number_input("Reviews: Review Count", min_value=0, value=100)
+buy_box_stock = st.sidebar.number_input("Buy Box 🚚: Stock", min_value=0, value=10)
+buy_box_is_fba = st.sidebar.selectbox("Buy Box: Is FBA", options=["Yes", "No"], index=0)
+prime_eligible = st.sidebar.selectbox("Prime Eligible (Buy Box)", options=["Yes", "No"], index=0)
+subscribe_save = st.sidebar.selectbox("Subscribe and Save", options=["Yes", "No"], index=0)
+price_change_month = st.sidebar.number_input("Price Change Month", min_value=1, max_value=12, value=6)
+price_change_day = st.sidebar.number_input("Price Change Day", min_value=1, max_value=31, value=15)
 
 # Add some space between the content (optional)
 st.sidebar.markdown("<br>", unsafe_allow_html=True)
 
-# Display the second image below the "Upload CSV File" section
+# Display the second image below the feature inputs
 st.sidebar.image(img2, use_column_width=True)
 
+# Process the input data and make predictions
+if st.sidebar.button("Predict"):
+    # Create a DataFrame with the input features
+    input_data = pd.DataFrame({
+        'price': [price],
+        'quantity': [quantity],
+        'Sales Rank: Current': [sales_rank_current],
+        'Reviews: Rating': [reviews_rating],
+        'Reviews: Review Count': [reviews_review_count],
+        'Buy Box 🚚: Stock': [buy_box_stock],
+        'Buy Box: Is FBA': [buy_box_is_fba],
+        'Prime Eligible (Buy Box)': [prime_eligible],
+        'Subscribe and Save': [subscribe_save],
+        'Price Change Month': [price_change_month],
+        'Price Change Day': [price_change_day]
+    })
 
-if uploaded_file is not None:
-    # Read the uploaded CSV file
-    new_data = pd.read_csv(uploaded_file)
-
-  
-    # Process the data
-    if 'Buy Box Seller' in new_data.columns:
-        original = new_data['Buy Box Seller']
-    else:
-        original = None
-
-    # Drop unnecessary columns and process the data
-    new_data.drop(columns=['ASIN', 'open_date', 'item_is_marketplace', 'Buy Box Seller'], axis=1, inplace=True, errors='ignore')
-
-    # Ensure 'Last Price Change' is processed
-    if 'Last Price Change' in new_data.columns:
-        new_data['Last Price Change'] = pd.to_datetime(new_data['Last Price Change'], errors='coerce')
-        new_data['Price Change Month'] = new_data['Last Price Change'].dt.month
-        new_data['Price Change Day'] = new_data['Last Price Change'].dt.day
-        new_data.drop(columns=['Last Price Change'], inplace=True)
-
-    # Transform the data
-    column_trans = model.named_steps['column_trans']
-    new_data_transformed = column_trans.transform(new_data)
+    # Check and update the ColumnTransformer
+    input_data_transformed = model.named_steps['column_trans'].transform(input_data)
 
     # Make predictions
-    grad_model = model.named_steps['grad_model']
-    predictions = grad_model.predict(new_data_transformed)
-
-        # Create a DataFrame with predictions
-    result = pd.DataFrame(predictions, columns=['Predictions'])
-    if original is not None:
-        result['Original'] = original
-        result['Correct'] = result['Predictions'] == result['Original']
-        correct_count = result['Correct'].sum()
-        accuracy = correct_count / len(result) * 100
-
-        st.subheader("Prediction Results")
-        st.write(result)
-        st.write(f"Number of correct predictions: {correct_count} out of {len(result)}")
-        st.write(f"Accuracy: {accuracy:.2f} %")
+    prediction = model.named_steps['grad_model'].predict(input_data_transformed)
+    
+    # Convert prediction to meaningful label
+    if prediction[0] == 1:
+        prediction_result = "Buy-Box"
     else:
-        st.subheader("Prediction Results")
-        st.write(result)
+        prediction_result = "Not Buy-Box"
     
-    # Display the first few rows of the uploaded data
-    st.subheader("Uploaded Data Preview")
-    st.write(new_data.head())
-    
-
-
+    # Display prediction result
+    st.subheader("Prediction Results:")
+    st.write(f"This Product Has **{prediction_result}**")

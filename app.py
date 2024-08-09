@@ -1,56 +1,59 @@
 import streamlit as st
-import pickle
-import joblib  # assuming joblib was used for saving the model
-import numpy as np
 import pandas as pd
+import pickle
 
-# Title of the app
-st.title("Model Prediction App")
+# Load the trained model
+@st.cache_resource
+def load_model():
+    with open('model.pkl', 'rb') as file:
+        return pickle.load(file)
 
-# File uploader for the model file
-model_file = st.file_uploader("Upload the trained model file", type=["pkl"])
-data_file = st.file_uploader("Upload the CSV file for prediction", type=["csv"])
+model = load_model()
 
-if model_file and data_file:
-    # Load the model
-    loaded_model = joblib.load(model_file)
-    
-    # Load the new data
-    new_data = pd.read_csv(data_file)
-    original = new_data['Buy Box Seller']
+# Set the header and sidebar title
+st.header("Amazon Buy Box Prediction")
+st.sidebar.title("Please select the features for prediction")
 
-    # Preprocessing
-    new_data.drop(columns=['ASIN', 'open_date', 'item_is_marketplace', 'Buy Box Seller'], axis=1, inplace=True)
-    new_data['Last Price Change'] = pd.to_datetime(new_data['Last Price Change'])
-    new_data['Price Change Month'] = new_data['Last Price Change'].dt.month
-    new_data['Price Change Day'] = new_data['Last Price Change'].dt.day
+# Create input fields for each feature
+price = st.sidebar.number_input("Price", min_value=0.0, value=19.99, step=0.01)
+quantity = st.sidebar.number_input("Quantity", min_value=1, value=1)
+sales_rank_current = st.sidebar.slider("Sales Rank: Current", 0, 100000, step=5000)
+reviews_rating = st.sidebar.slider("Reviews: Rating", 0.0, 5.0, value=4.5, step=0.1)
+reviews_review_count = st.sidebar.number_input("Reviews: Review Count", min_value=0, value=100)
+buy_box_stock = st.sidebar.selectbox("Buy Box 🚚: Stock", options=["In Stock", "Out of Stock"])
+buy_box_is_fba = st.sidebar.selectbox("Buy Box: Is FBA", options=["Yes", "No"])
 
-    # Transform the data using the same transformations as the training data
-    new_data_transformed = loaded_model.named_steps['column_trans'].transform(new_data)
+prime_eligible = st.sidebar.selectbox("Prime Eligible (Buy Box)", options=["Yes", "No"])
+subscribe_save = st.sidebar.selectbox("Subscribe and Save", options=["Yes", "No"])
+price_change_month = st.sidebar.slider("Price Change Month", 1, 12, value=6)
+price_change_day = st.sidebar.slider("Price Change Day", 1, 31, value=15)
+
+# Add a button to trigger the prediction
+if st.sidebar.button("Predict"):
+    # Create a DataFrame with the input features
+    input_data = pd.DataFrame({
+        'price': [price],
+        'quantity': [quantity],
+        'Sales Rank: Current': [sales_rank_current],
+        'Reviews: Rating': [reviews_rating],
+        'Reviews: Review Count': [reviews_review_count],
+        'Buy Box 🚚: Stock': [buy_box_stock],
+        'Buy Box: Is FBA': [buy_box_is_fba],
+        'Prime Eligible (Buy Box)': [prime_eligible],
+        'Subscribe and Save': [subscribe_save],
+        'Price Change Month': [price_change_month],
+        'Price Change Day': [price_change_day]
+    })
+
+    # Transform the data
+    column_trans = model.named_steps['column_trans']
+    input_data_transformed = column_trans.transform(input_data)
 
     # Make predictions
-    predictions = loaded_model.named_steps['grad_model'].predict(new_data_transformed)
+    grad_model = model.named_steps['grad_model']
+    prediction = grad_model.predict(input_data_transformed)
 
-    # Create a results dataframe
-    result = pd.DataFrame(predictions, columns=['predictions'])
-    result['original'] = original
+    # Display prediction result
+    st.subheader("Prediction Results")
+    st.write(f"The predicted Buy Box Seller is: **{prediction[0]}**")
 
-    # Compare the predictions with the original values to see which ones are correct
-    result['Correct'] = result['predictions'] == result['original']
-
-    # Count how many predictions were correct
-    correct_count = result['Correct'].sum()
-
-    # Calculate the accuracy
-    accuracy = correct_count / len(result) * 100
-
-    # Display the results
-    st.write("Number of correct predictions out of {}: {}".format(len(result), correct_count))
-    st.write("Accuracy: {:.2f}%".format(accuracy))
-
-    # Show the detailed results in a table
-    st.write("Detailed Results")
-    st.dataframe(result)
-
-else:
-    st.write("Please upload both the model file and the CSV data file.")
