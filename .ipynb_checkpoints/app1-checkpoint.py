@@ -122,7 +122,7 @@ st.markdown(
     <style>
     /* Target the sidebar header */
     .st-emotion-cache-uzeiqp h2 {
-        color: white;
+        color: #30373e; /* Update the color to #30373e */
         font-size: 20px;
     }
     </style>
