@@ -3,6 +3,8 @@ import base64
 import pickle
 import pandas as pd
 from PIL import Image
+import os  # Import os module for handling file paths
+
 
 # Function to set background image
 def set_background(image_file):
@@ -21,8 +23,12 @@ def set_background(image_file):
     """
     st.markdown(css, unsafe_allow_html=True)
 
+# Construct the path to the background image using os.path.join
+image_path = os.path.join('1.png')
+
 # Set the background image
-set_background("1.png")
+set_background(image_path)
+
 
 # Custom CSS for header background color only
 st.markdown(
@@ -57,8 +63,8 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # Load your images
-img1 = Image.open("emsbay.jpg")
-img2 = Image.open("whole-basket.png")
+img1 = os.path.join('emsbay.jpg')
+img2 = os.path.join('whole-basket.png')
 
 # Display the first image at the top of the sidebar
 st.sidebar.image(img1, use_column_width=True)
@@ -66,9 +72,11 @@ st.sidebar.image(img1, use_column_width=True)
 # Load the trained model
 @st.cache_resource
 def load_model():
-    with open('modell.pkl', 'rb') as file:
+    model_path = os.path.join('modell.pkl')  # Construct the path to the model file
+    with open(model_path, 'rb') as file:
         return pickle.load(file)
 
+# Load the model
 model = load_model()
 
 # Custom CSS for sidebar styling
