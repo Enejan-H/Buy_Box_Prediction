@@ -5,6 +5,7 @@ import pandas as pd
 from PIL import Image
 import os  # Import os module for handling file paths
 
+
 # Function to set background image
 def set_background(image_file):
     with open(image_file, "rb") as image:
@@ -27,6 +28,7 @@ image_path = os.path.join('1.png')
 
 # Set the background image
 set_background(image_path)
+
 
 # Custom CSS for header background color only
 st.markdown(
@@ -187,24 +189,5 @@ if st.sidebar.button("Predict"):
         prediction_result = "Not Buy-Box"
     
     # Display prediction result
-    st.header("Prediction Results:")
-    st.subheader(f"This Product Has **{prediction_result}**")
-
-    # Add space of 2cm (approximately 80 pixels)
-    st.markdown("<div style='margin-bottom: 80px;'></div>", unsafe_allow_html=True)
-
-    # Add useful links
-    st.markdown(
-        """
-        <h3>Useful Links For Extra Informations</h3>
-        <ul>
-            <li><a href="https://research.sabanciuniv.edu/id/eprint/45502/1/10480390.pdf" target="_blank">A MACHINE LEARNING APPROACH TO UNDERSTAND THE
-AMAZON BUY BOX MECHANISM</a></li>
-            <li><a href="https://questromworld.bu.edu/platformstrategy/wp-content/uploads/sites/49/2022/07/PlatStrat2022_paper_52.pdf"_blank">Steering in One Click: Platform Self-Preferencing in
-the Amazon Buy Box*</a></li>
-            <li><a href="https://mislove.org/publications/Amazon-WWW.pdf" target="_blank">An Empirical Analysis of Algorithmic Pricing
-on Amazon Marketplace</a></li>
-        </ul>
-        """,
-        unsafe_allow_html=True
-    )
+    st.subheader("Prediction Results:")
+    st.write(f"This Product Has **{prediction_result}**")
