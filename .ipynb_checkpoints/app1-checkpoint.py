@@ -63,6 +63,7 @@ st.markdown("""
 # Load your images
 img1 = os.path.join('emsbay.jpg')
 img2 = os.path.join('whole-basket.png')
+img3 = os.path.join('feature_importance.png')
 
 # Display the first image at the top of the sidebar
 st.sidebar.image(img1, use_column_width=True)
@@ -179,7 +180,8 @@ if st.sidebar.button("Predict"):
 
     # Make predictions
     prediction = model.named_steps['grad_model'].predict(input_data_transformed)
-    
+    prediction_proba = model.named_steps['grad_model'].predict_proba(input_data_transformed)
+
     # Convert prediction to meaningful label
     if prediction[0] == 1:
         prediction_result = "Buy-Box"
@@ -190,8 +192,15 @@ if st.sidebar.button("Predict"):
     st.header("Prediction Results:")
     st.subheader(f"This Product Has **{prediction_result}**")
 
+    # Display probabilistic value
+    st.write(f"Probability of being Buy-Box: **{prediction_proba[0][1]:.2f}**")
+    st.write(f"Probability of not being Buy-Box: **{prediction_proba[0][0]:.2f}**")
+
     # Add space of 2cm (approximately 80 pixels)
     st.markdown("<div style='margin-bottom: 80px;'></div>", unsafe_allow_html=True)
+
+    # Display the feature importance image
+    st.image(img3, caption='Feature Importance', use_column_width=True)
 
     # Add useful links
     st.markdown(

@@ -1,6 +1,9 @@
-streamlit
-pandas
-scikit-learn
-pickle-mixin
+langchain
+openai
+pinecone-client
+langchain-pinecone
+langchain-openai
+python-dotenv
+pypdf
 
 
